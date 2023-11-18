@@ -100,9 +100,10 @@ const skuPopuRef = ref<SkuPopupInstance>()
 const selectArrText = computed(() => {
   return skuPopuRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
 })
-//加入购物车
+
+// 加入购物车
 const onAddCart = async (ev: SkuPopupEvent) => {
-  await postMemberAddressAPI({ attrsText: selectArrText.value, count: ev.buy_num, id: ev.goods_id })
+  await postMemberCartAPI({ attrsText: selectArrText.value, count: ev.buy_num, id: ev.goods_id })
   uni.showToast({ title: '添加成功' })
   isShowSku.value = false
 }

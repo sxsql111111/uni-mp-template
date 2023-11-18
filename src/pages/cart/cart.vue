@@ -7,6 +7,7 @@ import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/
 const onChangeCount = (ev: InputNumberBoxEvent) => {
   putMemberCartBySkuIdAPI(ev.index, { count: ev.value })
 }
+
 const memberStore = useMemberStore()
 //获取购物车数据
 const cartList = ref<CartItem[]>([])
@@ -14,6 +15,7 @@ const getMemberCartData = async () => {
   const res = await getMemberCartAPI()
   cartList.value = res.result
 }
+
 onShow(() => {
   //用户允许登录才允许调用
   if (memberStore.profile) getMemberCartData()
@@ -34,51 +36,64 @@ const onDeleteCart = (skuId: string) => {
     }
   })
 }
-//修改选中状态---单品修改
-const onChangeSelected = (item: CartItem) => {
-  //前端数据更新--是否选中取反
+// 修改选中状态
+const onChangeSelected = async (item: CartItem) => {
+  //
   item.selected = !item.selected
-  //侯丹数据更新
-  putMemberCartBySkuIdAPI(item.id, { selected: item.selected, count: item.count })
+  // 后端数据更新
+  await putMemberCartBySkuIdAPI(item.id, { selected: item.selected, count: item.count })
 }
-
-//计算全选状态
+// 计算全选状态
 const isSelectedAll = computed(() => {
   return cartList.value.length && cartList.value.every((v) => v.selected)
 })
 
-//修改选中状态---全选修改
+//修改选中状态-全选修改
 const onChangeSelectedAll = () => {
-  //全选状态取反
+  //全选状态更新
   const _isSelectedAll = !isSelectedAll.value
   //前端数据更新
   cartList.value.forEach((item) => {
     item.selected = _isSelectedAll
   })
-  //后端数据更新
+  // 后端数据更新
   putMemberCartSelectedAPI({ selected: _isSelectedAll })
 }
 
-//计算选中单品列表
+// 计算选中单品列表
 const selectedCartList = computed(() => {
   return cartList.value.filter((v) => v.selected)
 })
-//计算选中的总件数
+
+// 计算选中的总件数
 const selectedCartListCount = computed(() => {
   return selectedCartList.value.reduce((sum, item) => sum + item.count, 0)
 })
-//计算选中的总金额
+
+// 计算总金额
 const selectedCartListMoney = computed(() => {
   return selectedCartList.value.reduce((sum, item) => sum + item.count * item.nowPrice, 0).toFixed(2)
 })
+
+// 结算按钮
+const gotoPayment = () => {
+  if (selectedCartListCount.value === 0) {
+    return uni.showToast({
+      icon: 'none',
+      title: '请选择商品'
+    })
+  }
+  // 跳转到结算页
+  uni.navigateTo({ url: '/pagesOrder/create/create' })
+}
 </script>
 
 <template>
   <scroll-view scroll-y class="scroll-view">
     <!-- 已登录: 显示购物车 -->
-    <template v-if="true">
+    <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
-      <view class="cart-list" v-if="true">
+      <view class="cart-list" v-if="cartList.length > 0">
         <!-- 优惠提示 -->
         <view class="tips">
           <text class="label">满减</text>
@@ -97,19 +112,18 @@ const selectedCartListMoney = computed(() => {
                 <view class="meta">
                   <view class="name ellipsis">{{ item.name }}</view>
                   <view class="attrsText ellipsis">{{ item.attrsText }}</view>
-                  <view class="price">7{{ item.price }}</view>
+                  <view class="price">{{ item.price }}</view>
                 </view>
               </navigator>
-              <!-- 商品数量 -->
-              <view class="count">
-                <vk-data-input-number-box
-                  v-model="item.count"
-                  :min="1"
-                  :max="item.stock"
-                  :index="item.id"
-                  @change="onChangeCount"
-                />
-              </view>
+            </view>
+            <view class="count">
+              <vk-data-input-number-box
+                v-model="item.count"
+                :min="1"
+                :max="item.stock"
+                :index="item.id"
+                @change="onChangeCount"
+              />
             </view>
             <!-- 右侧删除按钮 -->
             <template #right>
@@ -130,11 +144,11 @@ const selectedCartListMoney = computed(() => {
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
-        <text @tap="onChangeSelectedAll" class="all" :class="{ checked: isSelectedAll }">全选</text>
+        <text class="all" @tap="onChangeSelectedAll" :class="{ checked: isSelectedAll }">全选</text>
         <text class="text">合计:</text>
         <text class="amount">{{ selectedCartListMoney }}</text>
-        <view class="button-grounp">
-          <view class="button payment-button" :class="{ disabled: selectedCartListCount }">
+        <view @tap="gotoPayment" class="button-grounp">
+          <view class="button payment-button" :class="{ disabled: selectedCartListCount < 1 }">
             去结算({{ selectedCartListCount }})
           </view>
         </view>
