@@ -11,10 +11,8 @@ const getHomeGoodsGuessLikeData = async () => {
   if (finish.value === true) {
     return uni.showToast({ icon: 'none', title: '没有更多数据~' })
   }
-  const res = await getHomeGoodsGuessLikeAPI(pageParams)
-  // 数组追加
-  guessList.value.push(...res.result.list)
-  // 分页条件
+  const res = await getHomeGoodsGuessLikeAPI(pageParams) // 数组追加
+  guessList.value.push(...res.result.list) // 分页条件
   if (pageParams.page < res.result.pages) {
     // 页码累加
     pageParams.page++
@@ -27,9 +25,16 @@ const getHomeGoodsGuessLikeData = async () => {
 onMounted(() => {
   getHomeGoodsGuessLikeData()
 })
+
+// 重置数据
+const resetData = () => {
+  pageParams.page = 1
+  guessList.value = []
+  finish.value = false
+}
 // 暴露方法
 defineExpose({
-  // resetData,
+  resetData,
   getMore: getHomeGoodsGuessLikeData
 })
 </script>
