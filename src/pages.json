@@ -18,6 +18,12 @@
       }
     },
     {
+      "path": "pages/goods/goods",
+      "style": {
+        "navigationBarTitleText": "商品详情"
+      }
+    },
+    {
       "path": "pages/my/my",
       "style": {
         "navigationBarTitleText": "我的",
@@ -37,6 +43,7 @@
         "navigationBarTitleText": "分类"
       }
     },
+
     {
       "path": "pages/login/login",
       "style": {
@@ -45,7 +52,9 @@
     },
     {
       "path": "pages/hot/hot",
-      "style": { "navigationBarTitleText": "热门推荐" }
+      "style": {
+        "navigationBarTitleText": "热门推荐"
+      }
     }
   ],
   "globalStyle": {
@@ -105,6 +114,18 @@
             "navigationStyle": "custom",
             "navigationBarTextStyle": "white",
             "navigationBarTitleText": "个人信息"
+          }
+        },
+        {
+          "path": "address/address",
+          "style": {
+            "navigationBarTitleText": "地址管理"
+          }
+        },
+        {
+          "path": "address/address-form",
+          "style": {
+            "navigationBarTitleText": "编辑地址"
           }
         }
       ]

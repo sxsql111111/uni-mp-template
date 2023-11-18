@@ -1,6 +1,37 @@
 <script setup lang="ts">
+import { onLoad } from '@dcloudio/uni-app'
+
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+
+// 接收页面参数
+const query = defineProps<{
+  id: string
+}>()
+// 获取商品详情信息
+const goods = ref<GoodsResult>()
+const getGoodsByIdData = async () => {
+  const res = await getGoodsByIdAPI(query.id)
+  goods.value = res.result
+}
+
+onLoad(() => {
+  getGoodsByIdData()
+})
+
+// 轮播变化时
+const currentIndex = ref(0)
+const onChange: UniHelper.SwiperOnChange = (ev) => {
+  currentIndex.value = ev.detail.current
+}
+// 点击图片时
+const onTapImage = (url: string) => {
+  // 大图预览
+  uni.previewImage({
+    current: url,
+    urls: goods.value!.mainPictures
+  })
+}
 </script>
 
 <template>
@@ -9,18 +40,15 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
     <view class="goods">
       <!-- 商品主图 -->
       <view class="preview">
-        <swiper circular>
-          <swiper-item>
-            <image
-              mode="aspectFill"
-              src="//yanxuan-item.nosdn.127.net/99c83709ca5f9fd5c5bb35d207ad7822.png"
-            />
+        <swiper circular @change="onChange">
+          <swiper-item v-for="item in goods?.mainPictures" :key="item">
+            <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
           </swiper-item>
         </swiper>
         <view class="indicator">
-          <text class="current">1</text>
+          <text class="current">{{ currentIndex + 1 }}</text>
           <text class="split">/</text>
-          <text class="total">1</text>
+          <text class="total">{{ goods?.mainPictures.length }}</text>
         </view>
       </view>
 
@@ -28,10 +56,10 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
       <view class="meta">
         <view class="price">
           <text class="symbol">¥</text>
-          <text class="number">79.00</text>
+          <text class="number">{{ goods?.price }}</text>
         </view>
-        <view class="name ellipsis">云珍·轻软旅行长绒棉方巾 </view>
-        <view class="desc"> 轻巧无捻小方巾，旅行便携，哪里贵了？ </view>
+        <view class="name ellipsis">{{ goods?.name }} </view>
+        <view class="desc"> {{ goods?.description }} </view>
       </view>
 
       <!-- 操作面板 -->
@@ -59,24 +87,13 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
       <view class="content">
         <view class="properties">
           <!-- 属性详情 -->
-          <view class="item">
-            <text class="label">属性名</text>
-            <text class="value">属性值</text>
-          </view>
-          <view class="item">
-            <text class="label">属性名</text>
-            <text class="value">属性值</text>
+          <view class="item" v-for="item in goods?.properties" :key="item.name">
+            <text class="label">{{ item.name }}</text>
+            <text class="value">{{ item.value }}</text>
           </view>
         </view>
         <!-- 图片详情 -->
-        <image
-          mode="widthFix"
-          src="//yanxuan-item.nosdn.127.net/a8d266886d31f6eb0d7333c815769305.jpg"
-        ></image>
-        <image
-          mode="widthFix"
-          src="//yanxuan-item.nosdn.127.net/a9bee1cb53d72e6cdcda210071cbd46a.jpg"
-        ></image>
+        <image mode="widthFix" v-for="item in goods?.productPictures" :key="item" :src="item"></image>
       </view>
     </view>
 
@@ -87,21 +104,17 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
       </view>
       <view class="content">
         <navigator
-          v-for="item in 4"
-          :key="item"
+          v-for="item in goods?.similarProducts"
+          :key="item.id"
           class="goods"
           hover-class="none"
-          :url="`/pages/goods/goods?id=`"
+          :url="`/pages/goods/goods?id=${item.id}`"
         >
-          <image
-            class="image"
-            mode="aspectFill"
-            src="//yanxuan-item.nosdn.127.net/e0cea368f41da1587b3b7fc523f169d7.png"
-          ></image>
-          <view class="name ellipsis">简约山形纹全棉提花毛巾</view>
+          <image class="image" mode="aspectFill" :src="item.picture"></image>
+          <view class="name ellipsis">{{ item.name }}</view>
           <view class="price">
             <text class="symbol">¥</text>
-            <text class="number">18.50</text>
+            <text class="number">{{ item.price }}</text>
           </view>
         </navigator>
       </view>
