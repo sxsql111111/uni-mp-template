@@ -1,8 +1,25 @@
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app'
-
+import type { SkuPopupLocaldata } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
+
+//定义枚举，按钮模式
+enum SkuMode {
+  Both = 1,
+  Cart = 2,
+  Buy = 3
+}
+
+const mode = ref<SkuMode>(SkuMode.Cart)
+
+//打开SKU弹窗修改按钮模式
+const openSkuPopup = (val: SkuMode) => {
+  //显示SKU弹窗
+  isShowSku.value = true
+  //修改按钮模式
+  mode.value = val
+}
 
 // 接收页面参数
 const query = defineProps<{
@@ -13,6 +30,22 @@ const goods = ref<GoodsResult>()
 const getGoodsByIdData = async () => {
   const res = await getGoodsByIdAPI(query.id)
   goods.value = res.result
+  // SKU组件所需格式
+  localdata.value = {
+    _id: res.result.id,
+    name: res.result.name,
+    goods_thumb: res.result.mainPictures[0],
+    spec_list: res.result.specs.map((v) => ({ name: v.name, list: v.value })),
+    sku_list: res.result.skus.map((v) => ({
+      _id: v.id,
+      goods_id: res.result.id,
+      goods_name: res.result.name,
+      image: v.cover,
+      price: v.price * 100, // 注意：需要乘以 100
+      stock: v.inventory,
+      sku_name_arr: v.specs.map((vv) => vv.valueName)
+    }))
+  }
 }
 
 onLoad(() => {
@@ -32,9 +65,30 @@ const onTapImage = (url: string) => {
     urls: goods.value!.mainPictures
   })
 }
+
+// 是否显示SKU组件
+const isShowSku = ref(false)
+// 商品信息
+const localdata = ref({} as SkuPopupLocaldata)
 </script>
 
 <template>
+  <!-- SKU弹窗组件 -->
+  <vk-data-goods-sku-popup
+    v-model="isShowSku"
+    :localdata="localdata"
+    :mode="mode"
+    add-cart-background-color="#FFA868"
+    buy-now-baackground-color="#000"
+  ></vk-data-goods-sku-popup>
+  <!-- 显示两个按钮 -->
+  <view @tap="openSkuPopup(SkuMode.Both)" class="item arrow">请选择商品规格</view>
+  <!-- 显示一个按钮 -->
+  <view @tap="openSkuPopup(SkuMode.Cart)" class="addcart"> 加入购物车 </view>
+  <view @tap="openSkuPopup(SkuMode.Buy)" class="payment"> 立即购买 </view>
+
+  <!-- 弹窗测试 -->
+  <button @tap="isShowSku = true">打开SKU弹窗</button>
   <scroll-view scroll-y class="viewport">
     <!-- 基本信息 -->
     <view class="goods">
