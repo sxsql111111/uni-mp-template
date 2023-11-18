@@ -35,7 +35,7 @@ export const getMemberProfileAPI = () => {
 }
 
 /**
- * 修改个⼈信息
+ * 修改个人信息
  * @param data 请求体参数
  */
 export const putMemberProfileAPI = (data: ProfileParams) => {
