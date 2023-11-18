@@ -1,5 +1,37 @@
 <script setup lang="ts">
-//
+// 分页参数
+const pageParams: Required<PageParams> = { page: 1, pageSize: 10 }
+// 猜你喜欢的列表
+const guessList = ref<GuessItem[]>([])
+// 已结束标记
+const finish = ref(false)
+// 获取猜你喜欢数据
+const getHomeGoodsGuessLikeData = async () => {
+  // 退出分页判断
+  if (finish.value === true) {
+    return uni.showToast({ icon: 'none', title: '没有更多数据~' })
+  }
+  const res = await getHomeGoodsGuessLikeAPI(pageParams)
+  // 数组追加
+  guessList.value.push(...res.result.list)
+  // 分页条件
+  if (pageParams.page < res.result.pages) {
+    // 页码累加
+    pageParams.page++
+  } else {
+    finish.value = true
+  }
+}
+
+// 组件挂载完毕
+onMounted(() => {
+  getHomeGoodsGuessLikeData()
+})
+// 暴露方法
+defineExpose({
+  // resetData,
+  getMore: getHomeGoodsGuessLikeData
+})
 </script>
 
 <template>
@@ -8,22 +40,22 @@
     <text class="text">猜你喜欢</text>
   </view>
   <view class="guess">
-    <navigator class="guess-item" v-for="item in 10" :key="item" :url="`/pages/goods/goods?id=114514`">
-      <image
-        class="image"
-        mode="aspectFill"
-        src="//img1.360buyimg.com/da/jfs/t1/168072/20/33221/83127/6514e9dcF8f7510e0/dfcc244cb87be585.jpg!q70.jpg"
-      ></image>
-      <view class="name"> 花西子 花浅染鸾羽拂眸眼部套刷青鸾舞翎柔软亲肤化妆刷套装工具 线条刷 </view>
+    <navigator
+      class="guess-item"
+      v-for="item in guessList"
+      :key="item.id"
+      :url="`/pages/goods/goods?id=${item.id}`"
+    >
+      <image class="image" mode="aspectFill" :src="item.picture"></image>
+      <view class="name"> {{ item.name }} </view>
       <view class="price">
         <text class="small">¥</text>
-        <text>79.00</text>
+        <text>{{ item.price }}</text>
       </view>
     </navigator>
   </view>
-  <view class="loading-text"> 正在加载... </view>
+  <view class="loading-text"> {{ finish ? '没有更多数据~' : '正在加载...' }}</view>
 </template>
-
 <style lang="scss">
 :host {
   display: block;
