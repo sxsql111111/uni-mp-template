@@ -66,24 +66,24 @@ const onBirthdayChange: UniHelper.DatePickerOnChange = (ev) => {
   profile.value.birthday = ev.detail.value
 }
 // 修改城市
-let fullLocationCode: [string, string, string] = ['', '', '']
 const onFullLocationChange: UniHelper.RegionPickerOnChange = (ev) => {
-  // 修改前端界面
-  fullLocation.value = ev.detail.value.join(' ')
-  // 提交后端更新
-  fullLocationCode = ev.detail.code!
+  fullLocation.value = ev.detail.value.join(' ') // 修改前端界面
+  let code = ev.detail.code! // 存入profile，提交后端更新
+  profile.value.provinceCode = code[0]
+  profile.value.cityCode = code[1]
+  profile.value.countyCode = code[2]
 }
-// 点击保存提交表单
+// 保存提交表单
 const onSubmit = async () => {
-  const { nickname, gender, birthday, profession } = profile.value
+  const { nickname, gender, birthday, profession, provinceCode, cityCode, countyCode } = profile.value
   const res = await putMemberProfileAPI({
     nickname,
     gender,
     birthday,
     profession,
-    provinceCode: fullLocationCode[0],
-    cityCode: fullLocationCode[1],
-    countyCode: fullLocationCode[2]
+    provinceCode,
+    cityCode,
+    countyCode
   })
   // 更新Store昵称
   memberStore.profile!.nickname = res.result.nickname
