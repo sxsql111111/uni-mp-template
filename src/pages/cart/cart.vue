@@ -1,8 +1,8 @@
-/** 购物车Tabbar页面 */
-
-<template> <CartMian safeAreaInsetBottom /> </template>
-<script>
-import CartMain from './components/CartMain'
+<template>
+  <CartMain />
+</template>
+<script setup>
+import CartMain from './components/CartMain.vue'
 </script>
 <style lang="scss">
 page {

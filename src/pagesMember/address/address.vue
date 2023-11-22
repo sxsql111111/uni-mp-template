@@ -11,20 +11,28 @@ onShow(() => {
   getMemberAddressData()
 })
 
-//删除地址
+// 删除收货地址
 const onDeleteAddress = (id: string) => {
   //二次确认
   uni.showModal({
-    content: '删除地址?',
+    content: '删除地址？',
     success: async (res) => {
       if (res.confirm) {
-        //根据id删除收货地址
+        //
         await deleteMemberAddressByIdAPI(id)
-        //重新获取收货地址列表
-        getMemberAddressData
+        //
+        getMemberAddressData()
       }
     }
   })
+}
+
+//
+const onChangeAddress = (item: AddressItem) => {
+  //
+  const addressStore = useAddressStore()
+  addressStore.changeSelectedAddress(item)
+  uni.navigateBack()
 }
 </script>
 
@@ -36,7 +44,7 @@ const onDeleteAddress = (id: string) => {
         <uni-swipe-action class="address-list">
           <!-- 收货地址项 -->
           <uni-swipe-action-item class="item" v-for="item in addressList" :key="item.id">
-            <view class="item-content">
+            <view class="item-content" @tap="onChangeAddress(item)">
               <view class="user">
                 {{ item.receiver }}
                 <text class="contact">{{ item.contact }}</text>
@@ -52,6 +60,7 @@ const onDeleteAddress = (id: string) => {
                 class="edit"
                 hover-class="none"
                 :url="`/pagesMember/address/address-form?id=${item.id}`"
+                @tap.stop="() => {}"
               >
                 修改
               </navigator>

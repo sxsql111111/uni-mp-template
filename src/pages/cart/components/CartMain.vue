@@ -4,15 +4,17 @@ import Guess from '@/components/Guess/Guess'
 import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
 import type { GuessInstance } from '@/types/component'
 
-//是否适配安全区
+// 是否适配安全区
 defineProps<{
   safeAreaInsetBottom?: boolean
 }>()
+
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 
-//优化购物车列表，默认展示列表
+// 优化购物车列表
 const showCartList = ref<boolean>(true)
+
 //修改商品数量
 const onChangeCount = (ev: InputNumberBoxEvent) => {
   putMemberCartBySkuIdAPI(ev.index, { count: ev.value })
@@ -111,7 +113,7 @@ const onScrolltolower = () => {
     <!-- 已登录: 显示购物车 -->
     <template v-if="memberStore.profile">
       <!-- 购物车列表 -->
-      <view class="cart-list" v-if="cartList.length > 0">
+      <view class="cart-list" v-if="showCartList">
         <!-- 优惠提示 -->
         <view class="tips">
           <text class="label">满减</text>
@@ -161,7 +163,6 @@ const onScrolltolower = () => {
         </navigator>
       </view>
       <!-- 吸底工具栏 -->
-      <view></view>
       <view
         class="toolbar"
         v-if="showCartList"

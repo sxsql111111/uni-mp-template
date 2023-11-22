@@ -37,6 +37,8 @@ const query = defineProps<{
 const goods = ref<GoodsResult>()
 const getGoodsByIdData = async () => {
   const res = await getGoodsByIdAPI(query.id)
+  console.log(res)
+  console.log(res.result.specs[0].value.slice(1, res.result.specs.length - 1))
   goods.value = res.result
   // SKU组件所需格式
   localdata.value = {
@@ -93,6 +95,7 @@ const openPopup = (name: typeof popupName.value) => {
 const isShowSku = ref(false)
 // 商品信息
 const localdata = ref({} as SkuPopupLocaldata)
+//
 
 //SKU组件实例
 const skuPopuRef = ref<SkuPopupInstance>()
@@ -101,11 +104,17 @@ const selectArrText = computed(() => {
   return skuPopuRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
 })
 
-// 加入购物车
+//加入购物车
 const onAddCart = async (ev: SkuPopupEvent) => {
   await postMemberCartAPI({ attrsText: selectArrText.value, count: ev.buy_num, id: ev.goods_id })
   uni.showToast({ title: '添加成功' })
   isShowSku.value = false
+}
+
+const onBuyNow = (ev: SkuPopupEvent) => {
+  uni.navigateTo({
+    url: `/pagesOrder/create/create?id=${ev.goods_id}&count=${ev.buy_num}&attrsText=${selectArrText.value}`
+  })
 }
 </script>
 
@@ -113,6 +122,7 @@ const onAddCart = async (ev: SkuPopupEvent) => {
   <!-- SKU弹窗组件 -->
   <vk-data-goods-sku-popup
     @add-cart="onAddCart"
+    @buy-now="onBuyNow"
     v-model="isShowSku"
     :localdata="localdata"
     :mode="mode"
